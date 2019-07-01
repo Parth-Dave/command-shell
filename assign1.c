@@ -8,7 +8,10 @@ bool log_flag=0;
 char *dir = malloc(sizeof(char)*DIR_BUF_SIZE);
 
 int main(int argc,char **argv){
-	sh_read();
-	sh_parse();
-	sh_execute();
+	char *line;
+	char **args;
+	int status;
+	line=sh_read();
+	agrs=sh_parse(line);
+	status=sh_execute();
 }
