@@ -58,6 +58,27 @@ char **sh_parse(char *line){
 	token_arr[position]=NULL;
 	return token_arr;
 
+
+}
+int sh_execute(char **args){
+	pid_t pid,wpid;
+	int status;
+
+	pid=fork();
+	if(pid==0){
+		if(execvp(args[0],args)==-1){
+			printf("error while executing\n");
+		}
+	}
+	else if(pid<0){
+		printf("error while forking\n");
+	}
+	else{
+		do{
+			wpid=waitpid(pid,&status,WUNTRACED);
+
+		}while(!WIFEXITED(status) && !WIFSIGNALED(status));
+	}
 }
 
 
@@ -67,5 +88,5 @@ int main(int argc,char **argv){
 	int status;
 	line=sh_read();
 	args=sh_parse(line);
-	status=sh_execute();
+	status=sh_execute(args);
 }
