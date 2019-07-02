@@ -2,6 +2,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 #define DIR_BUF_SIZE 256
@@ -10,9 +11,9 @@
 #define TOKEN_DELIM "\t\r\n\a"
 
 
-bool on_flag=0;
-bool log_flag=0;
-char *dir = malloc(sizeof(char)*DIR_BUF_SIZE);
+int on_flag=0;
+int log_flag=0;
+//char *dir = malloc(sizeof(char)*DIR_BUF_SIZE);
 
 
 char *sh_read(){
