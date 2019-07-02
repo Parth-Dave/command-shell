@@ -7,8 +7,8 @@
 
 #define DIR_BUF_SIZE 256
 #define READ_BUF_SIZE 1024
-#define TOKEN_BUF_SIZE 128
-#define TOKEN_DELIM "\t\r\n\a"
+#define TOKEN_BUF_SIZE 20
+#define TOKEN_DELIM " \t\r\n\a"
 
 
 int on_flag=0;
@@ -44,17 +44,19 @@ char **sh_parse(char *line){
 
 
 	int bufsize=TOKEN_BUF_SIZE;
-	char **token_arr=malloc(bufsize*sizeof(char*));
+	char **token_arr = malloc(bufsize * sizeof(char*));
 	char *token;
 	int position=0;
-	if(token_arr){
-		printf("Error allocating token_arr\n");
-	}
+	//if(token_arr){
+	//	fprintf(stderr, "lsh: allocation error\n");
+    //	exit(EXIT_FAILURE);
+	//}
 	token=strtok(line,TOKEN_DELIM);
-	while(token!=NULL){
+	while(token != NULL){
 		token_arr[position]=token;
 		position++;
-		token=strtok(NULL,TOKEN_DELIM);
+		//printf("this is token loop %d\n", position);
+		token = strtok(NULL,TOKEN_DELIM);
 	}
 	token_arr[position]=NULL;
 	return token_arr;
@@ -64,11 +66,13 @@ char **sh_parse(char *line){
 int sh_execute(char **args){
 	pid_t pid,wpid;
 	int status;
-
+	//printf("this is child loop %ld",sizeof(args)/sizeof(char*));
 	pid=fork();
 	if(pid==0){
-		if(execvp(args[0],args)==-1){
-			printf("error while executing\n");
+		
+		if(execvp(args[0], args) == -1){
+			
+			perror("lsh");
 		}
 	}
 	else if(pid<0){
@@ -80,6 +84,7 @@ int sh_execute(char **args){
 
 		}while(!WIFEXITED(status) && !WIFSIGNALED(status));
 	}
+	return status;
 }
 
 
@@ -87,7 +92,12 @@ int main(int argc,char **argv){
 	char *line;
 	char **args;
 	int status;
+	do{
 	line=sh_read();
 	args=sh_parse(line);
 	status=sh_execute(args);
+
+	free(line);
+	free(args);
+	}while(status);
 }
