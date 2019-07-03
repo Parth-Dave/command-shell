@@ -12,7 +12,7 @@
 
 
 int on_flag=0;
-int log_flag=0;
+int log_flag=1;
 //char *dir = malloc(sizeof(char)*DIR_BUF_SIZE);
 
 
@@ -66,6 +66,7 @@ char **sh_parse(char *line){
 int sh_execute(char **args){
 	pid_t pid,wpid;
 	int status;
+	
 	//printf("this is child loop %ld",sizeof(args)/sizeof(char*));
 	pid=fork();
 	if(pid==0){
@@ -87,12 +88,51 @@ int sh_execute(char **args){
 	return status;
 }
 
+int sh_start_output_log(){
+	char buffer[1024];
+
+	int out_pipe[2];
+	pipe(out_pipe);
+
+	int backup=dup(fileno(stdout));
+
+	dup2(out_pipe[1],fileno(stdout));
+	//fgets(buffer, 1024, 1);
+
+	FILE *output_log;
+	output_log=fopen("output.log","a+");
+	fprintf(output_log, "%.*s\n",1024,buffer);
+	fclose(output_log);
+
+	printf("%s", buffer); 
+}
+
 
 int main(int argc,char **argv){
 	char *line;
 	char **args;
 	int status;
+	//int nbytes;
+	//char foo[1024];
+
+	//FILE *output_log;
+	
+
+//s	FILE *command_log;
+	//command_log=fopen("command.log","a+");
+	// printf("outside main pipe loop\n");
+	// int link[2];
+	// if(pipe(link) == -1){
+	// 	perror("pipe");
+	// }
+	// dup2(link[1],STDOUT_FILENO);
+	// close(link[0]);
+	// //close(link[1]);
+	printf("outside main while loop\n");
 	while(1){//program running not triggered
+		if(log_flag==1){
+			sh_start_output_log();
+		}
 		if(on_flag==0){//check for entry
 			line=sh_read();
 			if(strcmp(line,"entry")==0){
@@ -108,16 +148,31 @@ int main(int argc,char **argv){
 			do{
 			line=sh_read();
 			if(strcmp(line,"exit")==0){
-				on_flag=0;
+				on_flag=0;//exit command entered
 				printf("Command line exited\n");
 				break;
 			}
 			args=sh_parse(line);
 			status=sh_execute(args);
-
+			// if(log_flag==1){
+			// 	output_log=fopen("output.log","a+");
+			// //	close(link[1]);
+   //  			nbytes = read(link[0], foo, sizeof(foo));
+   // 				fprintf(output_log, "%.*s\n",nbytes,foo);
+   // 				//printf("%.*s\n",nbytes,foo);
+   // 				fclose(output_log);
+			// }
+			// else{
+			// //	close(link[1]);
+   //  			nbytes = read(link[0], foo, sizeof(foo));
+   // 				//printf("%.*s\n",nbytes,foo);
+			// }
 			free(line);
 			free(args);
-			}while(status);
+			}while(on_flag==1);
+			//close(link[1]);
+    		// nbytes = read(link[0], foo, sizeof(foo));
+   			// printf("%.*s\n",nbytes,foo);
 		}
 
 	}
