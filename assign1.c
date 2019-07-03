@@ -47,15 +47,11 @@ char **sh_parse(char *line){
 	char **token_arr = malloc(bufsize * sizeof(char*));
 	char *token;
 	int position=0;
-	//if(token_arr){
-	//	fprintf(stderr, "lsh: allocation error\n");
-    //	exit(EXIT_FAILURE);
-	//}
 	token=strtok(line,TOKEN_DELIM);
 	while(token != NULL){
 		token_arr[position]=token;
 		position++;
-		//printf("this is token loop %d\n", position);
+		
 		token = strtok(NULL,TOKEN_DELIM);
 	}
 	token_arr[position]=NULL;
@@ -67,7 +63,7 @@ int sh_execute(char **args){
 	pid_t pid,wpid;
 	int status;
 	
-	//printf("this is child loop %ld",sizeof(args)/sizeof(char*));
+	
 	pid=fork();
 	if(pid==0){
 		
@@ -102,13 +98,6 @@ int sh_start_output_log(FILE *output_log){
 	
 
 	dup2(fileno(output_log),fileno(stdout));
-	//nbytes = read(out_pipe[0], buffer, sizeof(buffer));
-
-	
-	//fprintf(output_log, "%.*s\n",nbytes,buffer);
-	//fclose(output_log);
-
-	//printf("%s", buffer); 
 	return backup;
 }
 
@@ -119,23 +108,7 @@ int main(int argc,char **argv){
 	int status;
 	FILE *output_log;
 	output_log=fopen("output.log","a+");
-	//int nbytes;
-	//char foo[1024];
 
-	//FILE *output_log;
-	
-
-//s	FILE *command_log;
-	//command_log=fopen("command.log","a+");
-	// printf("outside main pipe loop\n");
-	// int link[2];
-	// if(pipe(link) == -1){
-	// 	perror("pipe");
-	// }
-	// dup2(link[1],STDOUT_FILENO);
-	// close(link[0]);
-	// //close(link[1]);
-	
 	int backup =sh_start_output_log(output_log);
 	printf("outside main while loop\n");
 	while(1){//program running not triggered
@@ -161,25 +134,11 @@ int main(int argc,char **argv){
 			}
 			args=sh_parse(line);
 			status=sh_execute(args);
-			// if(log_flag==1){
-			// 	output_log=fopen("output.log","a+");
-			// //	close(link[1]);
-   //  			nbytes = read(link[0], foo, sizeof(foo));
-   // 				fprintf(output_log, "%.*s\n",nbytes,foo);
-   // 				//printf("%.*s\n",nbytes,foo);
-   // 				fclose(output_log);
-			// }
-			// else{
-			// //	close(link[1]);
-   //  			nbytes = read(link[0], foo, sizeof(foo));
-   // 				//printf("%.*s\n",nbytes,foo);
-			// }
+
 			free(line);
 			free(args);
 			}while(on_flag==1);
-			//close(link[1]);
-    		// nbytes = read(link[0], foo, sizeof(foo));
-   			// printf("%.*s\n",nbytes,foo);
+
 		}
 
 	}
