@@ -12,7 +12,7 @@
 
 
 int on_flag=0;
-int log_flag=1;
+int log_flag=0;
 //char *dir = malloc(sizeof(char)*DIR_BUF_SIZE);
 
 
@@ -109,10 +109,9 @@ int main(int argc,char **argv){
 	FILE *output_log;
 	output_log=fopen("output.log","a+");
 
-	int backup =sh_start_output_log(output_log);
-	printf("outside main while loop\n");
-	while(1){//program running not triggered
-		
+	int backup;
+	while(1){//main loop
+
 		if(on_flag==0){//check for entry
 			line=sh_read();
 			if(strcmp(line,"entry")==0){
@@ -125,12 +124,24 @@ int main(int argc,char **argv){
 		}
 		
 		if(on_flag==1){//entry command triggered
+
 			do{
 			line=sh_read();
 			if(strcmp(line,"exit")==0){
 				on_flag=0;//exit command entered
 				printf("Command line exited\n");
 				break;
+			}
+			if(strcmp(line,"log")==0 && log_flag==0){
+				log_flag=1;
+				 backup=sh_start_output_log(output_log);
+				continue;
+			}
+
+			if(strcmp(line,"unlog")==0 && log_flag ==1){
+				log_flag=0;
+				dup2(backup,fileno(stdout));
+				continue;
 			}
 			args=sh_parse(line);
 			status=sh_execute(args);
