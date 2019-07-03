@@ -90,6 +90,7 @@ int sh_execute(char **args){
 
 int sh_start_output_log(){
 	char buffer[1024];
+	int nbytes;
 
 	int out_pipe[2];
 	pipe(out_pipe);
@@ -97,11 +98,11 @@ int sh_start_output_log(){
 	int backup=dup(fileno(stdout));
 
 	dup2(out_pipe[1],fileno(stdout));
-	//fgets(buffer, 1024, 1);
+	nbytes = read(out_pipe[0], buffer, sizeof(buffer));
 
 	FILE *output_log;
 	output_log=fopen("output.log","a+");
-	fprintf(output_log, "%.*s\n",1024,buffer);
+	fprintf(output_log, "%.*s\n",nbytes,buffer);
 	fclose(output_log);
 
 	printf("%s", buffer); 
