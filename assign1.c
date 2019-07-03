@@ -92,12 +92,33 @@ int main(int argc,char **argv){
 	char *line;
 	char **args;
 	int status;
-	do{
-	line=sh_read();
-	args=sh_parse(line);
-	status=sh_execute(args);
+	while(1){//program running not triggered
+		if(on_flag==0){//check for entry
+			line=sh_read();
+			if(strcmp(line,"entry")==0){
+				on_flag=1;
+			}
+			else{
+				printf("Command line intepretor not started\n");
+			}
+			free(line);
+		}
+		
+		if(on_flag==1){//entry command triggered
+			do{
+			line=sh_read();
+			if(strcmp(line,"exit")==0){
+				on_flag=0;
+				printf("Command line exited\n");
+				break;
+			}
+			args=sh_parse(line);
+			status=sh_execute(args);
 
-	free(line);
-	free(args);
-	}while(status);
+			free(line);
+			free(args);
+			}while(status);
+		}
+
+	}
 }
