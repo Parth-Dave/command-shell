@@ -75,6 +75,7 @@ int sh_execute(char **args){
 			
 			perror("lsh");
 		}
+
 	}
 	else if(pid<0){
 		printf("error while forking\n");
@@ -88,7 +89,7 @@ int sh_execute(char **args){
 	return status;
 }
 
-int sh_start_output_log(){
+int sh_start_output_log(FILE *output_log){
 	char buffer[1024];
 	int nbytes;
 
@@ -97,15 +98,18 @@ int sh_start_output_log(){
 
 	int backup=dup(fileno(stdout));
 
-	dup2(out_pipe[1],fileno(stdout));
-	nbytes = read(out_pipe[0], buffer, sizeof(buffer));
+	
+	
 
-	FILE *output_log;
-	output_log=fopen("output.log","a+");
-	fprintf(output_log, "%.*s\n",nbytes,buffer);
-	fclose(output_log);
+	dup2(fileno(output_log),fileno(stdout));
+	//nbytes = read(out_pipe[0], buffer, sizeof(buffer));
 
-	printf("%s", buffer); 
+	
+	//fprintf(output_log, "%.*s\n",nbytes,buffer);
+	//fclose(output_log);
+
+	//printf("%s", buffer); 
+	return backup;
 }
 
 
@@ -113,6 +117,8 @@ int main(int argc,char **argv){
 	char *line;
 	char **args;
 	int status;
+	FILE *output_log;
+	output_log=fopen("output.log","a+");
 	//int nbytes;
 	//char foo[1024];
 
@@ -129,11 +135,11 @@ int main(int argc,char **argv){
 	// dup2(link[1],STDOUT_FILENO);
 	// close(link[0]);
 	// //close(link[1]);
+	
+	int backup =sh_start_output_log(output_log);
 	printf("outside main while loop\n");
 	while(1){//program running not triggered
-		if(log_flag==1){
-			sh_start_output_log();
-		}
+		
 		if(on_flag==0){//check for entry
 			line=sh_read();
 			if(strcmp(line,"entry")==0){
